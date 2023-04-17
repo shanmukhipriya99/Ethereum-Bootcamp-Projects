@@ -13,17 +13,14 @@ function App() {
     const getUserAccount = async () => {
       try {
         const account = await connectToMetaMask();
-        setAccount(account);
-        if (account) {
-          await server.post(`addAccount/${account}`);
-        }
+        setAccount(account.toLowerCase());
       } catch (error) {
         console.error(error);
       }
     };
     getUserAccount();
     window.ethereum.on('accountsChanged', (accounts) => {
-      setAccount(accounts[0]);
+      setAccount(accounts[0].toLowerCase());
     });
   }, []);
 

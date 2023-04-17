@@ -11,8 +11,8 @@ const balances = {};
 app.post('/addAccount/:account', (req, res) => {
   const { account } = req.params;
   // Update the balances object with the new account
-  if (!balances.hasOwnProperty(account)) {
-    balances[account] = 100; // Set initial balance to 0
+  if (!balances.hasOwnProperty(account.toLowerCase())) {
+    balances[account] = 100; // Set initial balance to 100
   }
   res.send({ success: true });
 });
@@ -20,6 +20,9 @@ app.post('/addAccount/:account', (req, res) => {
 app.get('/balance/:account', (req, res) => {
   const { account } = req.params;
   const balance = balances[account] || 0;
+  console.log('balances:', balances);
+  console.log('Account:', balances[account]);
+  console.log('balance:', balance);
   res.send({ balance });
 });
 
@@ -34,6 +37,9 @@ app.post('/send', (req, res) => {
   } else {
     balances[sender] -= amount;
     balances[recipient] += amount;
+    console.log(
+      `SenderBalance: ${balances[sender]}, ReceiverBalance: ${balances[recipient]}`
+    );
     res.send({ balance: balances[sender] });
   }
 });

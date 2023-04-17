@@ -5,11 +5,10 @@ function Transfer({ account, setBalance }) {
   const [sendAmount, setSendAmount] = useState('');
   const [recipient, setRecipient] = useState('');
 
-  const setValue = (setter) => (evt) => setter(evt.target.value);
+  const setValue = (setter) => (evt) => setter(evt.target.value.toLowerCase());
 
   async function transfer(evt) {
     evt.preventDefault();
-
     try {
       const {
         data: { balance },
