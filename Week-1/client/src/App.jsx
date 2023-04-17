@@ -1,12 +1,12 @@
 import Wallet from './Wallet';
 import Transfer from './Transfer';
 import connectToMetaMask from './metamask';
+import server from './server';
 import './App.scss';
 import { useState, useEffect } from 'react';
 
 function App() {
   const [balance, setBalance] = useState(0);
-  const [address, setAddress] = useState('');
   const [account, setAccount] = useState('');
 
   useEffect(() => {
@@ -14,11 +14,17 @@ function App() {
       try {
         const account = await connectToMetaMask();
         setAccount(account);
+        if (account) {
+          await server.post(`addAccount/${account}`);
+        }
       } catch (error) {
         console.error(error);
       }
     };
     getUserAccount();
+    window.ethereum.on('accountsChanged', (accounts) => {
+      setAccount(accounts[0]);
+    });
   }, []);
 
   return (
@@ -26,10 +32,10 @@ function App() {
       <Wallet
         balance={balance}
         setBalance={setBalance}
-        address={address}
-        setAddress={setAddress}
+        account={account}
+        setAccount={setAccount}
       />
-      <Transfer setBalance={setBalance} address={address} />
+      <Transfer setBalance={setBalance} account={account} />
     </div>
   );
 }
