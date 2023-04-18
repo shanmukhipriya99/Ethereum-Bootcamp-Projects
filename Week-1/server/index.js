@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const port = 3042;
+const secp = require('./utils/secp');
 
 app.use(cors());
 app.use(express.json());
@@ -20,14 +21,11 @@ app.post('/addAccount/:account', (req, res) => {
 app.get('/balance/:account', (req, res) => {
   const { account } = req.params;
   const balance = balances[account] || 0;
-  console.log('balances:', balances);
-  console.log('Account:', balances[account]);
-  console.log('balance:', balance);
   res.send({ balance });
 });
 
 app.post('/send', (req, res) => {
-  const { sender, recipient, amount } = req.body;
+  const { sender, recipient, amount, hashedMsg, sign } = req.body;
 
   setInitialBalance(sender);
   setInitialBalance(recipient);
@@ -35,12 +33,23 @@ app.post('/send', (req, res) => {
   if (balances[sender] < amount) {
     res.status(400).send({ message: 'Not enough funds!' });
   } else {
-    balances[sender] -= amount;
-    balances[recipient] += amount;
-    console.log(
-      `SenderBalance: ${balances[sender]}, ReceiverBalance: ${balances[recipient]}`
+    // signature
+    const signature = secp.getSignature(sign);
+    // recoverPublicKey()
+    const publicKey = secp.getPublicKey(signature, hashedMsg);
+    // verify()
+    const isValidSignature = secp.isValidSignature(
+      signature,
+      hashedMsg,
+      publicKey
     );
-    res.send({ balance: balances[sender] });
+    if (isValidSignature) {
+      balances[sender] -= amount;
+      balances[recipient] += amount;
+      res.send({ balance: balances[sender] });
+    } else {
+      res.status(400).send({ message: 'Error: Invalid Signature' });
+    }
   }
 });
 

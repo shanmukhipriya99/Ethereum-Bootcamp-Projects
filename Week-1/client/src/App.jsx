@@ -20,7 +20,7 @@ function App() {
     };
     getUserAccount();
     window.ethereum.on('accountsChanged', (accounts) => {
-      setAccount(accounts[0].toLowerCase());
+      setAccount(accounts[0]);
     });
   }, []);
 
